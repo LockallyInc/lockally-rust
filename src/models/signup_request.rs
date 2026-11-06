@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct SignupRequest {
+    /// Workspace id. 3 to 63 characters of lowercase a-z, 0-9 and hyphens, starting and ending with a letter or digit. Anything else is refused with 400 Invalid workspace id.
     #[serde(rename = "slug")]
     pub slug: String,
     #[serde(rename = "display_name", skip_serializing_if = "Option::is_none")]

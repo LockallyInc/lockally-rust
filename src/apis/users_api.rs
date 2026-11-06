@@ -33,6 +33,7 @@ pub enum DeleteUserError {
     Status401(models::Problem),
     Status403(models::Problem),
     Status404(models::Problem),
+    Status409(models::Problem),
     UnknownValue(serde_json::Value),
 }
 
@@ -63,6 +64,7 @@ pub enum UpdateUserError {
     Status401(models::Problem),
     Status403(models::Problem),
     Status404(models::Problem),
+    Status409(models::Problem),
     UnknownValue(serde_json::Value),
 }
 
@@ -107,7 +109,7 @@ pub async fn create_user(configuration: &configuration::Configuration, create_us
     }
 }
 
-/// Soft-deletes the user by setting status to deprovisioned.
+/// Sets the user's status to `deprovisioned` and ends their access: each of their mailboxes and their console membership is disabled, app passwords are revoked, and every webmail and console session ends. Their mail is kept. API keys belong to the workspace and are not revoked; rotate any the person had access to. 
 pub async fn delete_user(configuration: &configuration::Configuration, id: &str) -> Result<(), Error<DeleteUserError>> {
     // add a prefix to parameters to efficiently prevent name collisions
     let p_path_id = id;
@@ -217,6 +219,7 @@ pub async fn list_users(configuration: &configuration::Configuration, limit: Opt
     }
 }
 
+/// Setting `status` to `suspended` or `deprovisioned` takes away everything the person signs in with: each of their mailboxes and their console membership is disabled, app passwords are revoked, and every webmail and console session ends. Setting it back to `active` restores what the suspension disabled, and nothing an admin disabled for another reason. API keys belong to the workspace, not to the person who created them, and are not revoked; rotate any the person had access to. 
 pub async fn update_user(configuration: &configuration::Configuration, id: &str, update_user_request: models::UpdateUserRequest) -> Result<models::User, Error<UpdateUserError>> {
     // add a prefix to parameters to efficiently prevent name collisions
     let p_path_id = id;

@@ -13,16 +13,16 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct CreateEncryptionRecoveryRequest {
-    #[serde(rename = "mailbox_email")]
-    pub mailbox_email: String,
+    #[serde(rename = "mailbox_email", skip_serializing_if = "Option::is_none")]
+    pub mailbox_email: Option<String>,
     #[serde(rename = "recovery_blob")]
     pub recovery_blob: String,
 }
 
 impl CreateEncryptionRecoveryRequest {
-    pub fn new(mailbox_email: String, recovery_blob: String) -> CreateEncryptionRecoveryRequest {
+    pub fn new(recovery_blob: String) -> CreateEncryptionRecoveryRequest {
         CreateEncryptionRecoveryRequest {
-            mailbox_email,
+            mailbox_email: None,
             recovery_blob,
         }
     }

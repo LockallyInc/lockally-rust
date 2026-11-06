@@ -98,12 +98,16 @@ Name | Type | Description  | Required | Notes
 
 ## list_templates
 
-> models::ListTemplates200Response list_templates()
+> models::ListTemplates200Response list_templates(sort, order)
 List templates
 
 ### Parameters
 
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Required | Notes
+------------- | ------------- | ------------- | ------------- | -------------
+**sort** | Option<**String**> | Field to order by. This list holds tens of rows per account, so every column is offered and none needs an index. |  |[default to name]
+**order** | Option<**String**> | Defaults to asc for the default field and asc for any other. Always tie-broken on id, so the order is total. |  |
 
 ### Return type
 

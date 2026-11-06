@@ -58,7 +58,7 @@ Name | Type | Description  | Required | Notes
 
 ## check_migration_dns
 
-> serde_json::Value check_migration_dns(id)
+> models::MigrationDnsCheck check_migration_dns(id)
 Check DNS readiness for cutover
 
 ### Parameters
@@ -70,7 +70,7 @@ Name | Type | Description  | Required | Notes
 
 ### Return type
 
-[**serde_json::Value**](serde_json::Value.md)
+[**models::MigrationDnsCheck**](MigrationDNSCheck.md)
 
 ### Authorization
 

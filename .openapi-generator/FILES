@@ -32,6 +32,10 @@ docs/BatchLookupPublicKeys200ResponseDataInner.md
 docs/BatchResult.md
 docs/BillingApi.md
 docs/BillingStatus.md
+docs/BulkUpsertExternalContacts200Response.md
+docs/BulkUpsertExternalContacts200ResponseResultsInner.md
+docs/BulkUpsertExternalContactsRequest.md
+docs/BulkUpsertExternalContactsRequestContactsInner.md
 docs/Calendar.md
 docs/CalendarEvent.md
 docs/CalendarIntegration.md
@@ -90,6 +94,7 @@ docs/DraftResult.md
 docs/DraftsApi.md
 docs/EncryptionApi.md
 docs/ExportMailbox201Response.md
+docs/ExternalContactInput.md
 docs/GalSettings.md
 docs/GetAddOnStatus200Response.md
 docs/GetAuditSummary200Response.md
@@ -112,6 +117,8 @@ docs/GetDomainsStatus200Response.md
 docs/GetDomainsStatus200ResponseDomainsInner.md
 docs/GetDomainsStatus200ResponseDomainsInnerChecksInner.md
 docs/GetEncryptionKey200Response.md
+docs/GetEncryptionStatus200Response.md
+docs/GetEncryptionStatus200ResponseMailboxesInner.md
 docs/GetIntegrationsSummary200Response.md
 docs/GetIntegrationsSummary200ResponseApiKeysInner.md
 docs/GetIntegrationsSummary200ResponseWebhooksInner.md
@@ -172,6 +179,8 @@ docs/MessageStatsRates.md
 docs/MessageStatsWindow.md
 docs/Migration.md
 docs/MigrationCredential.md
+docs/MigrationDnsCheck.md
+docs/MigrationDomainDns.md
 docs/MigrationEvent.md
 docs/MigrationMailbox.md
 docs/MigrationProgress.md
@@ -187,6 +196,7 @@ docs/Resource.md
 docs/ResourcesApi.md
 docs/ReturnPath.md
 docs/ReturnPathCheck.md
+docs/RotateApiKeyRequest.md
 docs/RotateEncryptionKeyRequest.md
 docs/SendApi.md
 docs/SendEmail200Response.md
@@ -210,6 +220,8 @@ docs/TemplateInput.md
 docs/TemplatesApi.md
 docs/Tenant.md
 docs/TenantApi.md
+docs/TenantHealthCheck.md
+docs/TenantHealthReport.md
 docs/TestApi.md
 docs/Thread.md
 docs/ThreadClassification.md
@@ -218,8 +230,10 @@ docs/ThreadMessage.md
 docs/ThreadMessageBody.md
 docs/ThreadMessageBodyBody.md
 docs/ThreadSummary.md
+docs/TrackingPolicy.md
 docs/UnitBundle.md
 docs/UpdateAdminRequest.md
+docs/UpdateApiKeyRequest.md
 docs/UpdateCalendarEventRequest.md
 docs/UpdateCalendarIntegrationRequest.md
 docs/UpdateCalendarMemberRequest.md
@@ -233,6 +247,7 @@ docs/UpdateMailboxRequest.md
 docs/UpdateMigrationMailboxRequest.md
 docs/UpdateMigrationRequest.md
 docs/UpdateResourceRequest.md
+docs/UpdateTrackingPolicyRequest.md
 docs/UpdateUserRequest.md
 docs/UpdateWebhookRequest.md
 docs/User.md
@@ -300,6 +315,10 @@ src/models/batch_lookup_public_keys_200_response.rs
 src/models/batch_lookup_public_keys_200_response_data_inner.rs
 src/models/batch_result.rs
 src/models/billing_status.rs
+src/models/bulk_upsert_external_contacts_200_response.rs
+src/models/bulk_upsert_external_contacts_200_response_results_inner.rs
+src/models/bulk_upsert_external_contacts_request.rs
+src/models/bulk_upsert_external_contacts_request_contacts_inner.rs
 src/models/calendar.rs
 src/models/calendar_event.rs
 src/models/calendar_integration.rs
@@ -349,6 +368,7 @@ src/models/draft.rs
 src/models/draft_list.rs
 src/models/draft_result.rs
 src/models/export_mailbox_201_response.rs
+src/models/external_contact_input.rs
 src/models/gal_settings.rs
 src/models/get_add_on_status_200_response.rs
 src/models/get_audit_summary_200_response.rs
@@ -371,6 +391,8 @@ src/models/get_domains_status_200_response.rs
 src/models/get_domains_status_200_response_domains_inner.rs
 src/models/get_domains_status_200_response_domains_inner_checks_inner.rs
 src/models/get_encryption_key_200_response.rs
+src/models/get_encryption_status_200_response.rs
+src/models/get_encryption_status_200_response_mailboxes_inner.rs
 src/models/get_integrations_summary_200_response.rs
 src/models/get_integrations_summary_200_response_api_keys_inner.rs
 src/models/get_integrations_summary_200_response_webhooks_inner.rs
@@ -428,6 +450,8 @@ src/models/message_stats_rates.rs
 src/models/message_stats_window.rs
 src/models/migration.rs
 src/models/migration_credential.rs
+src/models/migration_dns_check.rs
+src/models/migration_domain_dns.rs
 src/models/migration_event.rs
 src/models/migration_mailbox.rs
 src/models/migration_progress.rs
@@ -442,6 +466,7 @@ src/models/replace_distribution_list_members_request.rs
 src/models/resource.rs
 src/models/return_path.rs
 src/models/return_path_check.rs
+src/models/rotate_api_key_request.rs
 src/models/rotate_encryption_key_request.rs
 src/models/send_email_200_response.rs
 src/models/send_email_202_response.rs
@@ -460,6 +485,8 @@ src/models/suppression.rs
 src/models/template.rs
 src/models/template_input.rs
 src/models/tenant.rs
+src/models/tenant_health_check.rs
+src/models/tenant_health_report.rs
 src/models/thread.rs
 src/models/thread_classification.rs
 src/models/thread_list.rs
@@ -467,8 +494,10 @@ src/models/thread_message.rs
 src/models/thread_message_body.rs
 src/models/thread_message_body_body.rs
 src/models/thread_summary.rs
+src/models/tracking_policy.rs
 src/models/unit_bundle.rs
 src/models/update_admin_request.rs
+src/models/update_api_key_request.rs
 src/models/update_calendar_event_request.rs
 src/models/update_calendar_integration_request.rs
 src/models/update_calendar_member_request.rs
@@ -482,6 +511,7 @@ src/models/update_mailbox_request.rs
 src/models/update_migration_mailbox_request.rs
 src/models/update_migration_request.rs
 src/models/update_resource_request.rs
+src/models/update_tracking_policy_request.rs
 src/models/update_user_request.rs
 src/models/update_webhook_request.rs
 src/models/user.rs

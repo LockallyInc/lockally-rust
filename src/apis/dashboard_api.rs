@@ -264,7 +264,7 @@ pub async fn get_storage(configuration: &configuration::Configuration, ) -> Resu
     }
 }
 
-pub async fn get_tenant_health(configuration: &configuration::Configuration, ) -> Result<serde_json::Value, Error<GetTenantHealthError>> {
+pub async fn get_tenant_health(configuration: &configuration::Configuration, ) -> Result<models::TenantHealthReport, Error<GetTenantHealthError>> {
 
     let uri_str = format!("{}/v1/health", configuration.base_path);
     let mut req_builder = configuration.client.request(reqwest::Method::GET, &uri_str);
@@ -291,8 +291,8 @@ pub async fn get_tenant_health(configuration: &configuration::Configuration, ) -
         let content = resp.text().await?;
         match content_type {
             ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
-            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `serde_json::Value`"))),
-            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `serde_json::Value`")))),
+            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::TenantHealthReport`"))),
+            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::TenantHealthReport`")))),
         }
     } else {
         let content = resp.text().await?;

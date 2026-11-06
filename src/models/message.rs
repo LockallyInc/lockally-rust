@@ -36,6 +36,12 @@ pub struct Message {
     pub bounce_reason: Option<String>,
     #[serde(rename = "size_bytes", skip_serializing_if = "Option::is_none")]
     pub size_bytes: Option<i32>,
+    /// The sender's own key/value from the send request. Always present; `{}` when none was set.
+    #[serde(rename = "metadata", skip_serializing_if = "Option::is_none")]
+    pub metadata: Option<std::collections::HashMap<String, String>>,
+    /// Grouping labels, lowercased and deduplicated. Always present; `[]` when none were set.
+    #[serde(rename = "tags", skip_serializing_if = "Option::is_none")]
+    pub tags: Option<Vec<String>>,
 }
 
 impl Message {
@@ -52,6 +58,8 @@ impl Message {
             updated_at,
             bounce_reason: None,
             size_bytes: None,
+            metadata: None,
+            tags: None,
         }
     }
 }

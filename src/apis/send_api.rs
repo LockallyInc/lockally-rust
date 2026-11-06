@@ -143,11 +143,12 @@ pub async fn get_message(configuration: &configuration::Configuration, id: &str)
 }
 
 /// Counts by delivery outcome (delivered/bounced/deferred/complaint) plus rates over a window, from the delivery-event store. Privacy-first: this reflects what receiving servers reported, NOT whether a human opened the mail, Lockally does no open/click tracking. 
-pub async fn get_message_stats(configuration: &configuration::Configuration, from: Option<chrono::DateTime<chrono::FixedOffset>>, to: Option<chrono::DateTime<chrono::FixedOffset>>, domain: Option<&str>) -> Result<models::MessageStats, Error<GetMessageStatsError>> {
+pub async fn get_message_stats(configuration: &configuration::Configuration, from: Option<chrono::DateTime<chrono::FixedOffset>>, to: Option<chrono::DateTime<chrono::FixedOffset>>, domain: Option<&str>, tag: Option<&str>) -> Result<models::MessageStats, Error<GetMessageStatsError>> {
     // add a prefix to parameters to efficiently prevent name collisions
     let p_query_from = from;
     let p_query_to = to;
     let p_query_domain = domain;
+    let p_query_tag = tag;
 
     let uri_str = format!("{}/v1/messages/stats", configuration.base_path);
     let mut req_builder = configuration.client.request(reqwest::Method::GET, &uri_str);
@@ -160,6 +161,9 @@ pub async fn get_message_stats(configuration: &configuration::Configuration, fro
     }
     if let Some(ref param_value) = p_query_domain {
         req_builder = req_builder.query(&[("domain", &param_value.to_string())]);
+    }
+    if let Some(ref param_value) = p_query_tag {
+        req_builder = req_builder.query(&[("tag", &param_value.to_string())]);
     }
     if let Some(ref user_agent) = configuration.user_agent {
         req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
@@ -194,14 +198,17 @@ pub async fn get_message_stats(configuration: &configuration::Configuration, fro
 }
 
 /// Returns recent outbound messages for the calling tenant, sorted newest first. 
-pub async fn list_messages(configuration: &configuration::Configuration, status: Option<&str>, sender: Option<&str>, q: Option<&str>, since: Option<chrono::DateTime<chrono::FixedOffset>>, cursor: Option<&str>, limit: Option<i32>) -> Result<models::ListMessages200Response, Error<ListMessagesError>> {
+pub async fn list_messages(configuration: &configuration::Configuration, status: Option<&str>, sender: Option<&str>, tag: Option<&str>, q: Option<&str>, since: Option<chrono::DateTime<chrono::FixedOffset>>, cursor: Option<&str>, limit: Option<i32>, sort: Option<&str>, order: Option<&str>) -> Result<models::ListMessages200Response, Error<ListMessagesError>> {
     // add a prefix to parameters to efficiently prevent name collisions
     let p_query_status = status;
     let p_query_sender = sender;
+    let p_query_tag = tag;
     let p_query_q = q;
     let p_query_since = since;
     let p_query_cursor = cursor;
     let p_query_limit = limit;
+    let p_query_sort = sort;
+    let p_query_order = order;
 
     let uri_str = format!("{}/v1/messages", configuration.base_path);
     let mut req_builder = configuration.client.request(reqwest::Method::GET, &uri_str);
@@ -211,6 +218,9 @@ pub async fn list_messages(configuration: &configuration::Configuration, status:
     }
     if let Some(ref param_value) = p_query_sender {
         req_builder = req_builder.query(&[("sender", &param_value.to_string())]);
+    }
+    if let Some(ref param_value) = p_query_tag {
+        req_builder = req_builder.query(&[("tag", &param_value.to_string())]);
     }
     if let Some(ref param_value) = p_query_q {
         req_builder = req_builder.query(&[("q", &param_value.to_string())]);
@@ -223,6 +233,12 @@ pub async fn list_messages(configuration: &configuration::Configuration, status:
     }
     if let Some(ref param_value) = p_query_limit {
         req_builder = req_builder.query(&[("limit", &param_value.to_string())]);
+    }
+    if let Some(ref param_value) = p_query_sort {
+        req_builder = req_builder.query(&[("sort", &param_value.to_string())]);
+    }
+    if let Some(ref param_value) = p_query_order {
+        req_builder = req_builder.query(&[("order", &param_value.to_string())]);
     }
     if let Some(ref user_agent) = configuration.user_agent {
         req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());

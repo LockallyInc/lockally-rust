@@ -55,6 +55,15 @@ pub enum GetEncryptionKeyError {
     UnknownValue(serde_json::Value),
 }
 
+/// struct for typed errors of method [`get_encryption_status`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum GetEncryptionStatusError {
+    Status401(models::Problem),
+    Status403(models::Problem),
+    UnknownValue(serde_json::Value),
+}
+
 /// struct for typed errors of method [`rotate_encryption_key`]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -106,6 +115,7 @@ pub async fn batch_lookup_public_keys(configuration: &configuration::Configurati
     }
 }
 
+/// Only the mailbox's own webmail session may call this; an API key is refused with 403. The private key is sealed under that mailbox's password, which an administrator never has. `mailbox_email`, if sent, must be the caller's own mailbox. A mailbox that already has a key is starting over: the old key is kept inactive, not destroyed, and the new one starts without a recovery code.
 pub async fn create_encryption_key(configuration: &configuration::Configuration, create_encryption_key_request: models::CreateEncryptionKeyRequest) -> Result<models::CreateEncryptionKey201Response, Error<CreateEncryptionKeyError>> {
     // add a prefix to parameters to efficiently prevent name collisions
     let p_body_create_encryption_key_request = create_encryption_key_request;
@@ -146,6 +156,7 @@ pub async fn create_encryption_key(configuration: &configuration::Configuration,
     }
 }
 
+/// Only the mailbox's own webmail session may call this; an API key is refused with 403. The private key is sealed under that mailbox's password, which an administrator never has. `mailbox_email`, if sent, must be the caller's own mailbox. The blob is the private key sealed under a recovery code the browser generated; the code itself is never sent. Replaces any earlier one.
 pub async fn create_encryption_recovery(configuration: &configuration::Configuration, create_encryption_recovery_request: models::CreateEncryptionRecoveryRequest) -> Result<(), Error<CreateEncryptionRecoveryError>> {
     // add a prefix to parameters to efficiently prevent name collisions
     let p_body_create_encryption_recovery_request = create_encryption_recovery_request;
@@ -175,6 +186,7 @@ pub async fn create_encryption_recovery(configuration: &configuration::Configura
     }
 }
 
+/// Anyone in the workspace gets the public key. The mailbox's own webmail session also gets its sealed private key, its sealed recovery copy and the recovery state.
 pub async fn get_encryption_key(configuration: &configuration::Configuration, email: &str) -> Result<models::GetEncryptionKey200Response, Error<GetEncryptionKeyError>> {
     // add a prefix to parameters to efficiently prevent name collisions
     let p_path_email = email;
@@ -214,6 +226,45 @@ pub async fn get_encryption_key(configuration: &configuration::Configuration, em
     }
 }
 
+/// For administrators: whether the add-on is on, and for each mailbox whether it has a key and a recovery code. Carries no key material.
+pub async fn get_encryption_status(configuration: &configuration::Configuration, ) -> Result<models::GetEncryptionStatus200Response, Error<GetEncryptionStatusError>> {
+
+    let uri_str = format!("{}/v1/encryption/status", configuration.base_path);
+    let mut req_builder = configuration.client.request(reqwest::Method::GET, &uri_str);
+
+    if let Some(ref user_agent) = configuration.user_agent {
+        req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
+    }
+    if let Some(ref token) = configuration.bearer_access_token {
+        req_builder = req_builder.bearer_auth(token.to_owned());
+    };
+
+    let req = req_builder.build()?;
+    let resp = configuration.client.execute(req).await?;
+
+    let status = resp.status();
+    let content_type = resp
+        .headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("application/octet-stream");
+    let content_type = super::ContentType::from(content_type);
+
+    if !status.is_client_error() && !status.is_server_error() {
+        let content = resp.text().await?;
+        match content_type {
+            ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
+            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::GetEncryptionStatus200Response`"))),
+            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::GetEncryptionStatus200Response`")))),
+        }
+    } else {
+        let content = resp.text().await?;
+        let entity: Option<GetEncryptionStatusError> = serde_json::from_str(&content).ok();
+        Err(Error::ResponseError(ResponseContent { status, content, entity }))
+    }
+}
+
+/// Only the mailbox's own webmail session may call this; an API key is refused with 403. The private key is sealed under that mailbox's password, which an administrator never has. `mailbox_email`, if sent, must be the caller's own mailbox. The key pair does not change, so every message stays readable.
 pub async fn rotate_encryption_key(configuration: &configuration::Configuration, rotate_encryption_key_request: models::RotateEncryptionKeyRequest) -> Result<(), Error<RotateEncryptionKeyError>> {
     // add a prefix to parameters to efficiently prevent name collisions
     let p_body_rotate_encryption_key_request = rotate_encryption_key_request;

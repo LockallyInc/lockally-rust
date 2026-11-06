@@ -141,7 +141,7 @@ This endpoint does not need any parameter.
 
 ## get_tenant_health
 
-> serde_json::Value get_tenant_health()
+> models::TenantHealthReport get_tenant_health()
 Full tenant health report
 
 ### Parameters
@@ -150,7 +150,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-[**serde_json::Value**](serde_json::Value.md)
+[**models::TenantHealthReport**](TenantHealthReport.md)
 
 ### Authorization
 

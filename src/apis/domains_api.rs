@@ -331,11 +331,20 @@ pub async fn get_return_path(configuration: &configuration::Configuration, domai
 }
 
 /// Returns every domain registered under the calling tenant.
-pub async fn list_domains(configuration: &configuration::Configuration, ) -> Result<models::ListDomains200Response, Error<ListDomainsError>> {
+pub async fn list_domains(configuration: &configuration::Configuration, sort: Option<&str>, order: Option<&str>) -> Result<models::ListDomains200Response, Error<ListDomainsError>> {
+    // add a prefix to parameters to efficiently prevent name collisions
+    let p_query_sort = sort;
+    let p_query_order = order;
 
     let uri_str = format!("{}/v1/domains", configuration.base_path);
     let mut req_builder = configuration.client.request(reqwest::Method::GET, &uri_str);
 
+    if let Some(ref param_value) = p_query_sort {
+        req_builder = req_builder.query(&[("sort", &param_value.to_string())]);
+    }
+    if let Some(ref param_value) = p_query_order {
+        req_builder = req_builder.query(&[("order", &param_value.to_string())]);
+    }
     if let Some(ref user_agent) = configuration.user_agent {
         req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
     }

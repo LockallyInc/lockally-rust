@@ -15,12 +15,16 @@ use serde::{Deserialize, Serialize};
 pub struct SendEmailBatchRequest {
     #[serde(rename = "messages")]
     pub messages: Vec<models::SendMessage>,
+    /// Template variables every message in the batch inherits. Each message's own `variables` override these key by key, so shared values are written once and per-recipient ones stay per-recipient.  Without this, a 500-message batch repeats every shared variable 500 times: most of the payload, and 500 places for one of them to differ by a typo. 
+    #[serde(rename = "variables", skip_serializing_if = "Option::is_none")]
+    pub variables: Option<std::collections::HashMap<String, String>>,
 }
 
 impl SendEmailBatchRequest {
     pub fn new(messages: Vec<models::SendMessage>) -> SendEmailBatchRequest {
         SendEmailBatchRequest {
             messages,
+            variables: None,
         }
     }
 }

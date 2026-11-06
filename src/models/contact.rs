@@ -41,6 +41,12 @@ pub struct Contact {
     pub created_at: chrono::DateTime<chrono::FixedOffset>,
     #[serde(rename = "updated_at")]
     pub updated_at: chrono::DateTime<chrono::FixedOffset>,
+    /// The system that owns this contact's external id. Absent on contacts made by hand.
+    #[serde(rename = "external_system", skip_serializing_if = "Option::is_none")]
+    pub external_system: Option<String>,
+    /// The contact's id in `external_system`. Absent on contacts made by hand.
+    #[serde(rename = "external_id", skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<String>,
 }
 
 impl Contact {
@@ -60,6 +66,8 @@ impl Contact {
             status,
             created_at,
             updated_at,
+            external_system: None,
+            external_id: None,
         }
     }
 }

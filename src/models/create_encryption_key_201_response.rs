@@ -19,6 +19,8 @@ pub struct CreateEncryptionKey201Response {
     pub mailbox_id: Option<uuid::Uuid>,
     #[serde(rename = "created_at", skip_serializing_if = "Option::is_none")]
     pub created_at: Option<chrono::DateTime<chrono::FixedOffset>>,
+    #[serde(rename = "replaced_old", skip_serializing_if = "Option::is_none")]
+    pub replaced_old: Option<bool>,
 }
 
 impl CreateEncryptionKey201Response {
@@ -27,6 +29,7 @@ impl CreateEncryptionKey201Response {
             id: None,
             mailbox_id: None,
             created_at: None,
+            replaced_old: None,
         }
     }
 }

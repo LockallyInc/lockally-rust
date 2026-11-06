@@ -13,8 +13,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct RotateEncryptionKeyRequest {
-    #[serde(rename = "mailbox_email")]
-    pub mailbox_email: String,
+    #[serde(rename = "mailbox_email", skip_serializing_if = "Option::is_none")]
+    pub mailbox_email: Option<String>,
     #[serde(rename = "encrypted_private_key")]
     pub encrypted_private_key: String,
     #[serde(rename = "kdf_params", skip_serializing_if = "Option::is_none")]
@@ -22,9 +22,9 @@ pub struct RotateEncryptionKeyRequest {
 }
 
 impl RotateEncryptionKeyRequest {
-    pub fn new(mailbox_email: String, encrypted_private_key: String) -> RotateEncryptionKeyRequest {
+    pub fn new(encrypted_private_key: String) -> RotateEncryptionKeyRequest {
         RotateEncryptionKeyRequest {
-            mailbox_email,
+            mailbox_email: None,
             encrypted_private_key,
             kdf_params: None,
         }

@@ -15,6 +15,8 @@ Name | Type | Description | Notes
 **updated_at** | **chrono::DateTime<chrono::FixedOffset>** |  | 
 **bounce_reason** | Option<**String**> |  | [optional]
 **size_bytes** | Option<**i32**> |  | [optional]
+**metadata** | Option<**std::collections::HashMap<String, String>**> | The sender's own key/value from the send request. Always present; `{}` when none was set. | [optional]
+**tags** | Option<**Vec<String>**> | Grouping labels, lowercased and deduplicated. Always present; `[]` when none were set. | [optional]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

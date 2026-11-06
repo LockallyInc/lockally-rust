@@ -22,6 +22,9 @@ pub struct CreateApiKeyRequest {
     /// Issue a test key (`lk_test_` prefix). A test key accepts sends, records them and fires a simulated delivery webhook without sending mail, and counts against no limit or allowance. 
     #[serde(rename = "test", skip_serializing_if = "Option::is_none")]
     pub test: Option<bool>,
+    /// Optional. When the key stops authenticating. Omit it for a key that does not expire. Must be in the future: an expiry already past would mint a key that fails its first request. 
+    #[serde(rename = "expires_at", skip_serializing_if = "Option::is_none")]
+    pub expires_at: Option<chrono::DateTime<chrono::FixedOffset>>,
 }
 
 impl CreateApiKeyRequest {
@@ -30,6 +33,7 @@ impl CreateApiKeyRequest {
             label,
             scopes,
             test: None,
+            expires_at: None,
         }
     }
 }

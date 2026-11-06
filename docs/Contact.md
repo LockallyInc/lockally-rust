@@ -18,6 +18,8 @@ Name | Type | Description | Notes
 **status** | **String** |  | 
 **created_at** | **chrono::DateTime<chrono::FixedOffset>** |  | 
 **updated_at** | **chrono::DateTime<chrono::FixedOffset>** |  | 
+**external_system** | Option<**String**> | The system that owns this contact's external id. Absent on contacts made by hand. | [optional]
+**external_id** | Option<**String**> | The contact's id in `external_system`. Absent on contacts made by hand. | [optional]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

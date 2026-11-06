@@ -31,6 +31,7 @@ pub enum CancelMigrationError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum CheckMigrationDnsError {
+    Status400(models::Problem),
     Status401(models::Problem),
     Status403(models::Problem),
     Status404(models::Problem),
@@ -295,7 +296,7 @@ pub async fn cancel_migration(configuration: &configuration::Configuration, id: 
     }
 }
 
-pub async fn check_migration_dns(configuration: &configuration::Configuration, id: &str) -> Result<serde_json::Value, Error<CheckMigrationDnsError>> {
+pub async fn check_migration_dns(configuration: &configuration::Configuration, id: &str) -> Result<models::MigrationDnsCheck, Error<CheckMigrationDnsError>> {
     // add a prefix to parameters to efficiently prevent name collisions
     let p_path_id = id;
 
@@ -324,8 +325,8 @@ pub async fn check_migration_dns(configuration: &configuration::Configuration, i
         let content = resp.text().await?;
         match content_type {
             ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
-            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `serde_json::Value`"))),
-            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `serde_json::Value`")))),
+            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::MigrationDnsCheck`"))),
+            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::MigrationDnsCheck`")))),
         }
     } else {
         let content = resp.text().await?;

@@ -73,7 +73,7 @@ Name | Type | Description  | Required | Notes
 
 ## get_message_stats
 
-> models::MessageStats get_message_stats(from, to, domain)
+> models::MessageStats get_message_stats(from, to, domain, tag)
 Aggregate delivery stats
 
 Counts by delivery outcome (delivered/bounced/deferred/complaint) plus rates over a window, from the delivery-event store. Privacy-first: this reflects what receiving servers reported, NOT whether a human opened the mail, Lockally does no open/click tracking. 
@@ -86,6 +86,7 @@ Name | Type | Description  | Required | Notes
 **from** | Option<**chrono::DateTime<chrono::FixedOffset>**> | Window start (default 7 days ago). |  |
 **to** | Option<**chrono::DateTime<chrono::FixedOffset>**> | Window end (default now). |  |
 **domain** | Option<**String**> | Filter by sender domain. |  |
+**tag** | Option<**String**> | Group the window by the sender's own tags: one tag, or a comma-separated set meaning ANY. Case-insensitive. This is the dimension that tells a transactional stream from a notification one. |  |
 
 ### Return type
 
@@ -105,7 +106,7 @@ Name | Type | Description  | Required | Notes
 
 ## list_messages
 
-> models::ListMessages200Response list_messages(status, sender, q, since, cursor, limit)
+> models::ListMessages200Response list_messages(status, sender, tag, q, since, cursor, limit, sort, order)
 List outbound messages
 
 Returns recent outbound messages for the calling tenant, sorted newest first. 
@@ -117,10 +118,13 @@ Name | Type | Description  | Required | Notes
 ------------- | ------------- | ------------- | ------------- | -------------
 **status** | Option<**String**> |  |  |
 **sender** | Option<**String**> | Exact match against the `from` mailbox. |  |
+**tag** | Option<**String**> | Filter to messages carrying any of these tags. One tag, or a comma-separated set meaning ANY. Case-insensitive: the value is normalised the same way tags are on write. |  |
 **q** | Option<**String**> | Free-text search across subject + sender. |  |
 **since** | Option<**chrono::DateTime<chrono::FixedOffset>**> | Only messages queued at or after this RFC 3339 instant. |  |
 **cursor** | Option<**String**> | queued_at of the prior page boundary. Pass back the `next_cursor` returned by the previous call. |  |
 **limit** | Option<**i32**> |  |  |[default to 50]
+**sort** | Option<**String**> | Field to order by. Only indexed columns are offered: an unindexed sort on this table is a full scan of the account's send history. status and sender are filters instead. |  |[default to queued_at]
+**order** | Option<**String**> | Defaults to desc for the default field and asc for any other. The order is always made total by a tie-break on id, so paging cannot repeat or skip a row that shares a timestamp. cursor encodes queued_at, so combining it with another sort is a 400 rather than a wrong page. |  |
 
 ### Return type
 

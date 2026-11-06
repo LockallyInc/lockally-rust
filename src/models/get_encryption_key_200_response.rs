@@ -25,6 +25,16 @@ pub struct GetEncryptionKey200Response {
     pub kdf_params: Option<serde_json::Value>,
     #[serde(rename = "version", skip_serializing_if = "Option::is_none")]
     pub version: Option<i32>,
+    #[serde(rename = "created_at", skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<chrono::DateTime<chrono::FixedOffset>>,
+    #[serde(rename = "rotated_at", skip_serializing_if = "Option::is_none")]
+    pub rotated_at: Option<chrono::DateTime<chrono::FixedOffset>>,
+    #[serde(rename = "has_recovery", skip_serializing_if = "Option::is_none")]
+    pub has_recovery: Option<bool>,
+    #[serde(rename = "recovery_set_at", skip_serializing_if = "Option::is_none")]
+    pub recovery_set_at: Option<chrono::DateTime<chrono::FixedOffset>>,
+    #[serde(rename = "recovery_blob", skip_serializing_if = "Option::is_none")]
+    pub recovery_blob: Option<String>,
 }
 
 impl GetEncryptionKey200Response {
@@ -36,6 +46,11 @@ impl GetEncryptionKey200Response {
             encrypted_private_key: None,
             kdf_params: None,
             version: None,
+            created_at: None,
+            rotated_at: None,
+            has_recovery: None,
+            recovery_set_at: None,
+            recovery_blob: None,
         }
     }
 }

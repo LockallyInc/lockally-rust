@@ -30,6 +30,15 @@ pub struct CreateApiKey201Response {
     pub revoked_at: Option<chrono::DateTime<chrono::FixedOffset>>,
     #[serde(rename = "created_at")]
     pub created_at: chrono::DateTime<chrono::FixedOffset>,
+    /// True for an lk_test_* key: the whole request path runs but a send never reaches the mail server and nothing counts against the account.
+    #[serde(rename = "test", skip_serializing_if = "Option::is_none")]
+    pub test: Option<bool>,
+    /// When the key stops authenticating. Null means it does not expire, which is how every key behaved before expiry existed. Enforced at authentication, so the key fails the first request after this moment rather than whenever a sweep runs. 
+    #[serde(rename = "expires_at", skip_serializing_if = "Option::is_none")]
+    pub expires_at: Option<chrono::DateTime<chrono::FixedOffset>>,
+    /// The successor issued by `POST /v1/api-keys/{id}/rotate`. Set on the PREDECESSOR, so you can see which key replaced this one while both still work through the overlap window. 
+    #[serde(rename = "rotated_to", skip_serializing_if = "Option::is_none")]
+    pub rotated_to: Option<uuid::Uuid>,
     /// The full `lk_live_<prefix>_<secret>` token. Shown ONCE.
     #[serde(rename = "secret")]
     pub secret: String,
@@ -46,6 +55,9 @@ impl CreateApiKey201Response {
             last_used_at: None,
             revoked_at: None,
             created_at,
+            test: None,
+            expires_at: None,
+            rotated_to: None,
             secret,
         }
     }

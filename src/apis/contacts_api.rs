@@ -15,6 +15,16 @@ use crate::{apis::ResponseContent, models};
 use super::{Error, configuration, ContentType};
 
 
+/// struct for typed errors of method [`bulk_upsert_external_contacts`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum BulkUpsertExternalContactsError {
+    Status400(models::Problem),
+    Status401(models::Problem),
+    Status403(models::Problem),
+    UnknownValue(serde_json::Value),
+}
+
 /// struct for typed errors of method [`create_contact`]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -29,6 +39,16 @@ pub enum CreateContactError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum DeleteContactError {
+    Status401(models::Problem),
+    Status403(models::Problem),
+    Status404(models::Problem),
+    UnknownValue(serde_json::Value),
+}
+
+/// struct for typed errors of method [`delete_external_contact`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum DeleteExternalContactError {
     Status401(models::Problem),
     Status403(models::Problem),
     Status404(models::Problem),
@@ -55,6 +75,16 @@ pub enum GetContactListsError {
     UnknownValue(serde_json::Value),
 }
 
+/// struct for typed errors of method [`get_external_contact`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum GetExternalContactError {
+    Status401(models::Problem),
+    Status403(models::Problem),
+    Status404(models::Problem),
+    UnknownValue(serde_json::Value),
+}
+
 /// struct for typed errors of method [`list_contacts`]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -75,6 +105,58 @@ pub enum UpdateContactError {
     UnknownValue(serde_json::Value),
 }
 
+/// struct for typed errors of method [`upsert_external_contact`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum UpsertExternalContactError {
+    Status400(models::Problem),
+    Status401(models::Problem),
+    Status403(models::Problem),
+    UnknownValue(serde_json::Value),
+}
+
+
+/// For a sync. Each row stands alone: a bad row is reported in `results` with its index and the rest are stored, so the response is 200 whenever the request itself is well formed. Read `failed` and `results`. Two rows with the same `external_id` in one request are refused (the later one), because which is current cannot be known. Rerunning the same payload updates rather than duplicates.
+pub async fn bulk_upsert_external_contacts(configuration: &configuration::Configuration, system: &str, bulk_upsert_external_contacts_request: models::BulkUpsertExternalContactsRequest) -> Result<models::BulkUpsertExternalContacts200Response, Error<BulkUpsertExternalContactsError>> {
+    // add a prefix to parameters to efficiently prevent name collisions
+    let p_path_system = system;
+    let p_body_bulk_upsert_external_contacts_request = bulk_upsert_external_contacts_request;
+
+    let uri_str = format!("{}/v1/contacts/external/{system}", configuration.base_path, system=crate::apis::urlencode(p_path_system));
+    let mut req_builder = configuration.client.request(reqwest::Method::PUT, &uri_str);
+
+    if let Some(ref user_agent) = configuration.user_agent {
+        req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
+    }
+    if let Some(ref token) = configuration.bearer_access_token {
+        req_builder = req_builder.bearer_auth(token.to_owned());
+    };
+    req_builder = req_builder.json(&p_body_bulk_upsert_external_contacts_request);
+
+    let req = req_builder.build()?;
+    let resp = configuration.client.execute(req).await?;
+
+    let status = resp.status();
+    let content_type = resp
+        .headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("application/octet-stream");
+    let content_type = super::ContentType::from(content_type);
+
+    if !status.is_client_error() && !status.is_server_error() {
+        let content = resp.text().await?;
+        match content_type {
+            ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
+            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::BulkUpsertExternalContacts200Response`"))),
+            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::BulkUpsertExternalContacts200Response`")))),
+        }
+    } else {
+        let content = resp.text().await?;
+        let entity: Option<BulkUpsertExternalContactsError> = serde_json::from_str(&content).ok();
+        Err(Error::ResponseError(ResponseContent { status, content, entity }))
+    }
+}
 
 pub async fn create_contact(configuration: &configuration::Configuration, create_contact_request: models::CreateContactRequest) -> Result<models::Contact, Error<CreateContactError>> {
     // add a prefix to parameters to efficiently prevent name collisions
@@ -140,6 +222,35 @@ pub async fn delete_contact(configuration: &configuration::Configuration, id: &s
     } else {
         let content = resp.text().await?;
         let entity: Option<DeleteContactError> = serde_json::from_str(&content).ok();
+        Err(Error::ResponseError(ResponseContent { status, content, entity }))
+    }
+}
+
+pub async fn delete_external_contact(configuration: &configuration::Configuration, system: &str, external_id: &str) -> Result<(), Error<DeleteExternalContactError>> {
+    // add a prefix to parameters to efficiently prevent name collisions
+    let p_path_system = system;
+    let p_path_external_id = external_id;
+
+    let uri_str = format!("{}/v1/contacts/external/{system}/{external_id}", configuration.base_path, system=crate::apis::urlencode(p_path_system), external_id=crate::apis::urlencode(p_path_external_id));
+    let mut req_builder = configuration.client.request(reqwest::Method::DELETE, &uri_str);
+
+    if let Some(ref user_agent) = configuration.user_agent {
+        req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
+    }
+    if let Some(ref token) = configuration.bearer_access_token {
+        req_builder = req_builder.bearer_auth(token.to_owned());
+    };
+
+    let req = req_builder.build()?;
+    let resp = configuration.client.execute(req).await?;
+
+    let status = resp.status();
+
+    if !status.is_client_error() && !status.is_server_error() {
+        Ok(())
+    } else {
+        let content = resp.text().await?;
+        let entity: Option<DeleteExternalContactError> = serde_json::from_str(&content).ok();
         Err(Error::ResponseError(ResponseContent { status, content, entity }))
     }
 }
@@ -218,6 +329,46 @@ pub async fn get_contact_lists(configuration: &configuration::Configuration, id:
     } else {
         let content = resp.text().await?;
         let entity: Option<GetContactListsError> = serde_json::from_str(&content).ok();
+        Err(Error::ResponseError(ResponseContent { status, content, entity }))
+    }
+}
+
+pub async fn get_external_contact(configuration: &configuration::Configuration, system: &str, external_id: &str) -> Result<models::Contact, Error<GetExternalContactError>> {
+    // add a prefix to parameters to efficiently prevent name collisions
+    let p_path_system = system;
+    let p_path_external_id = external_id;
+
+    let uri_str = format!("{}/v1/contacts/external/{system}/{external_id}", configuration.base_path, system=crate::apis::urlencode(p_path_system), external_id=crate::apis::urlencode(p_path_external_id));
+    let mut req_builder = configuration.client.request(reqwest::Method::GET, &uri_str);
+
+    if let Some(ref user_agent) = configuration.user_agent {
+        req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
+    }
+    if let Some(ref token) = configuration.bearer_access_token {
+        req_builder = req_builder.bearer_auth(token.to_owned());
+    };
+
+    let req = req_builder.build()?;
+    let resp = configuration.client.execute(req).await?;
+
+    let status = resp.status();
+    let content_type = resp
+        .headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("application/octet-stream");
+    let content_type = super::ContentType::from(content_type);
+
+    if !status.is_client_error() && !status.is_server_error() {
+        let content = resp.text().await?;
+        match content_type {
+            ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
+            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::Contact`"))),
+            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::Contact`")))),
+        }
+    } else {
+        let content = resp.text().await?;
+        let entity: Option<GetExternalContactError> = serde_json::from_str(&content).ok();
         Err(Error::ResponseError(ResponseContent { status, content, entity }))
     }
 }
@@ -317,6 +468,49 @@ pub async fn update_contact(configuration: &configuration::Configuration, id: &s
     } else {
         let content = resp.text().await?;
         let entity: Option<UpdateContactError> = serde_json::from_str(&content).ok();
+        Err(Error::ResponseError(ResponseContent { status, content, entity }))
+    }
+}
+
+/// Idempotent: the path is the identity, so sending the same request twice cannot create a second contact, and you never need to store our id. Returns 201 when the contact was created and 200 when it already existed. The body is the full representation: a field you leave out is cleared. Email is an ordinary attribute, not a key, so changing it updates the same contact. `mailboxes:write` is also accepted.
+pub async fn upsert_external_contact(configuration: &configuration::Configuration, system: &str, external_id: &str, external_contact_input: models::ExternalContactInput) -> Result<models::Contact, Error<UpsertExternalContactError>> {
+    // add a prefix to parameters to efficiently prevent name collisions
+    let p_path_system = system;
+    let p_path_external_id = external_id;
+    let p_body_external_contact_input = external_contact_input;
+
+    let uri_str = format!("{}/v1/contacts/external/{system}/{external_id}", configuration.base_path, system=crate::apis::urlencode(p_path_system), external_id=crate::apis::urlencode(p_path_external_id));
+    let mut req_builder = configuration.client.request(reqwest::Method::PUT, &uri_str);
+
+    if let Some(ref user_agent) = configuration.user_agent {
+        req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
+    }
+    if let Some(ref token) = configuration.bearer_access_token {
+        req_builder = req_builder.bearer_auth(token.to_owned());
+    };
+    req_builder = req_builder.json(&p_body_external_contact_input);
+
+    let req = req_builder.build()?;
+    let resp = configuration.client.execute(req).await?;
+
+    let status = resp.status();
+    let content_type = resp
+        .headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("application/octet-stream");
+    let content_type = super::ContentType::from(content_type);
+
+    if !status.is_client_error() && !status.is_server_error() {
+        let content = resp.text().await?;
+        match content_type {
+            ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
+            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::Contact`"))),
+            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::Contact`")))),
+        }
+    } else {
+        let content = resp.text().await?;
+        let entity: Option<UpsertExternalContactError> = serde_json::from_str(&content).ok();
         Err(Error::ResponseError(ResponseContent { status, content, entity }))
     }
 }

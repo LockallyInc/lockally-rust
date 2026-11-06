@@ -25,6 +25,9 @@ pub struct BatchResult {
     /// Present when this message failed; the others are then absent.
     #[serde(rename = "error", skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
+    /// Advisory, and NOT a failure. Today the only one is a template variable the template referenced and the request never supplied, which rendered as the empty string.
+    #[serde(rename = "warning", skip_serializing_if = "Option::is_none")]
+    pub warning: Option<String>,
 }
 
 impl BatchResult {
@@ -35,6 +38,7 @@ impl BatchResult {
             message_id: None,
             status: None,
             error: None,
+            warning: None,
         }
     }
 }
