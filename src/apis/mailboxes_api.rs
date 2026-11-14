@@ -1,7 +1,7 @@
 /*
- * lockally control plane
+ * Lockally API
  *
- * The lockally control plane lets integrators and direct customers manage everything except actual mail data flow (which uses standard JMAP / IMAP / SMTP-submission against the data plane endpoints).  **Authentication.** All `/v1/_*` endpoints require a Bearer API key in the `Authorization` header. Keys are formatted `lk_live_<8-char-prefix>_<32-char-secret>`, or `lk_test_<...>` for a test key. Create keys in the dashboard, or with `POST /v1/api-keys` using a key that holds `tenant:admin`.  The key's plan is checked on every request, so a key stops working if the account moves to a plan without API access, and works again if it moves back.  **Errors.** Failures return [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) `application/problem+json` documents.  **Scopes.** Each endpoint requires a specific scope on the presented key. Insufficient scope returns `403` with the required scope name in `detail`. 
+ * Official Lockally SDK for Rust: send email and manage mailboxes, domains and webhooks through the Lockally API.  **Authentication.** All `/v1/_*` endpoints require a Bearer API key in the `Authorization` header. Keys are formatted `lk_live_<8-char-prefix>_<32-char-secret>`, or `lk_test_<...>` for a test key. Create keys in the dashboard, or with `POST /v1/api-keys` using a key that holds `tenant:admin`.  The key's plan is checked on every request, so a key stops working if the account moves to a plan without API access, and works again if it moves back.  **Errors.** Failures return [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) `application/problem+json` documents.  **Scopes.** Each endpoint requires a specific scope on the presented key. Insufficient scope returns `403` with the required scope name in `detail`. 
  *
  * The version of the OpenAPI document: 0.1.0
  * Contact: support@lockally.com
@@ -48,15 +48,6 @@ pub enum DeleteMailboxError {
     UnknownValue(serde_json::Value),
 }
 
-/// struct for typed errors of method [`delete_vacation_responder`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum DeleteVacationResponderError {
-    Status401(models::Problem),
-    Status403(models::Problem),
-    UnknownValue(serde_json::Value),
-}
-
 /// struct for typed errors of method [`download_mailbox_export`]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -87,16 +78,6 @@ pub enum GetMailboxError {
     UnknownValue(serde_json::Value),
 }
 
-/// struct for typed errors of method [`get_vacation_responder`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetVacationResponderError {
-    Status401(models::Problem),
-    Status403(models::Problem),
-    Status404(models::Problem),
-    UnknownValue(serde_json::Value),
-}
-
 /// struct for typed errors of method [`list_mailboxes`]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -116,30 +97,10 @@ pub enum ListSharedMembersError {
     UnknownValue(serde_json::Value),
 }
 
-/// struct for typed errors of method [`list_vacation_responders`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum ListVacationRespondersError {
-    Status401(models::Problem),
-    Status403(models::Problem),
-    UnknownValue(serde_json::Value),
-}
-
 /// struct for typed errors of method [`remove_shared_member`]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum RemoveSharedMemberError {
-    Status401(models::Problem),
-    Status403(models::Problem),
-    Status404(models::Problem),
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`set_vacation_responder`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum SetVacationResponderError {
-    Status400(models::Problem),
     Status401(models::Problem),
     Status403(models::Problem),
     Status404(models::Problem),
@@ -269,35 +230,6 @@ pub async fn delete_mailbox(configuration: &configuration::Configuration, email:
     }
 }
 
-/// Idempotent, 204 whether or not a row existed.
-pub async fn delete_vacation_responder(configuration: &configuration::Configuration, email: &str) -> Result<(), Error<DeleteVacationResponderError>> {
-    // add a prefix to parameters to efficiently prevent name collisions
-    let p_path_email = email;
-
-    let uri_str = format!("{}/v1/mailboxes/{email}/vacation", configuration.base_path, email=crate::apis::urlencode(p_path_email));
-    let mut req_builder = configuration.client.request(reqwest::Method::DELETE, &uri_str);
-
-    if let Some(ref user_agent) = configuration.user_agent {
-        req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
-    }
-    if let Some(ref token) = configuration.bearer_access_token {
-        req_builder = req_builder.bearer_auth(token.to_owned());
-    };
-
-    let req = req_builder.build()?;
-    let resp = configuration.client.execute(req).await?;
-
-    let status = resp.status();
-
-    if !status.is_client_error() && !status.is_server_error() {
-        Ok(())
-    } else {
-        let content = resp.text().await?;
-        let entity: Option<DeleteVacationResponderError> = serde_json::from_str(&content).ok();
-        Err(Error::ResponseError(ResponseContent { status, content, entity }))
-    }
-}
-
 /// Public endpoint (no Authorization header). Validates the one-shot token from the URL, marks it used, and streams an mbox file. Second GET with the same token returns 404, tokens are single-use. 
 pub async fn download_mailbox_export(configuration: &configuration::Configuration, email: &str, token: &str) -> Result<reqwest::Response, Error<DownloadMailboxExportError>> {
     // add a prefix to parameters to efficiently prevent name collisions
@@ -405,46 +337,6 @@ pub async fn get_mailbox(configuration: &configuration::Configuration, email: &s
     }
 }
 
-/// Returns the stored vacation rule or 404 if none is set.
-pub async fn get_vacation_responder(configuration: &configuration::Configuration, email: &str) -> Result<models::VacationResponder, Error<GetVacationResponderError>> {
-    // add a prefix to parameters to efficiently prevent name collisions
-    let p_path_email = email;
-
-    let uri_str = format!("{}/v1/mailboxes/{email}/vacation", configuration.base_path, email=crate::apis::urlencode(p_path_email));
-    let mut req_builder = configuration.client.request(reqwest::Method::GET, &uri_str);
-
-    if let Some(ref user_agent) = configuration.user_agent {
-        req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
-    }
-    if let Some(ref token) = configuration.bearer_access_token {
-        req_builder = req_builder.bearer_auth(token.to_owned());
-    };
-
-    let req = req_builder.build()?;
-    let resp = configuration.client.execute(req).await?;
-
-    let status = resp.status();
-    let content_type = resp
-        .headers()
-        .get("content-type")
-        .and_then(|v| v.to_str().ok())
-        .unwrap_or("application/octet-stream");
-    let content_type = super::ContentType::from(content_type);
-
-    if !status.is_client_error() && !status.is_server_error() {
-        let content = resp.text().await?;
-        match content_type {
-            ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
-            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::VacationResponder`"))),
-            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::VacationResponder`")))),
-        }
-    } else {
-        let content = resp.text().await?;
-        let entity: Option<GetVacationResponderError> = serde_json::from_str(&content).ok();
-        Err(Error::ResponseError(ResponseContent { status, content, entity }))
-    }
-}
-
 /// Returns mailboxes under the calling tenant, active and soft-deleted. `?limit=N` between 1 and 200 (default 50). 
 pub async fn list_mailboxes(configuration: &configuration::Configuration, limit: Option<u32>) -> Result<models::ListMailboxes200Response, Error<ListMailboxesError>> {
     // add a prefix to parameters to efficiently prevent name collisions
@@ -527,44 +419,6 @@ pub async fn list_shared_members(configuration: &configuration::Configuration, e
     }
 }
 
-/// Returns every vacation responder for the calling tenant.
-pub async fn list_vacation_responders(configuration: &configuration::Configuration, ) -> Result<models::ListVacationResponders200Response, Error<ListVacationRespondersError>> {
-
-    let uri_str = format!("{}/v1/vacation", configuration.base_path);
-    let mut req_builder = configuration.client.request(reqwest::Method::GET, &uri_str);
-
-    if let Some(ref user_agent) = configuration.user_agent {
-        req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
-    }
-    if let Some(ref token) = configuration.bearer_access_token {
-        req_builder = req_builder.bearer_auth(token.to_owned());
-    };
-
-    let req = req_builder.build()?;
-    let resp = configuration.client.execute(req).await?;
-
-    let status = resp.status();
-    let content_type = resp
-        .headers()
-        .get("content-type")
-        .and_then(|v| v.to_str().ok())
-        .unwrap_or("application/octet-stream");
-    let content_type = super::ContentType::from(content_type);
-
-    if !status.is_client_error() && !status.is_server_error() {
-        let content = resp.text().await?;
-        match content_type {
-            ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
-            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::ListVacationResponders200Response`"))),
-            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::ListVacationResponders200Response`")))),
-        }
-    } else {
-        let content = resp.text().await?;
-        let entity: Option<ListVacationRespondersError> = serde_json::from_str(&content).ok();
-        Err(Error::ResponseError(ResponseContent { status, content, entity }))
-    }
-}
-
 pub async fn remove_shared_member(configuration: &configuration::Configuration, email: &str, member_email: &str) -> Result<(), Error<RemoveSharedMemberError>> {
     // add a prefix to parameters to efficiently prevent name collisions
     let p_path_email = email;
@@ -590,48 +444,6 @@ pub async fn remove_shared_member(configuration: &configuration::Configuration, 
     } else {
         let content = resp.text().await?;
         let entity: Option<RemoveSharedMemberError> = serde_json::from_str(&content).ok();
-        Err(Error::ResponseError(ResponseContent { status, content, entity }))
-    }
-}
-
-/// Upsert, same endpoint creates or replaces the rule. Clears `synced_at`; the rule is staged until a later sync pushes it to the mail server. 
-pub async fn set_vacation_responder(configuration: &configuration::Configuration, email: &str, set_vacation_responder_request: models::SetVacationResponderRequest) -> Result<models::VacationResponder, Error<SetVacationResponderError>> {
-    // add a prefix to parameters to efficiently prevent name collisions
-    let p_path_email = email;
-    let p_body_set_vacation_responder_request = set_vacation_responder_request;
-
-    let uri_str = format!("{}/v1/mailboxes/{email}/vacation", configuration.base_path, email=crate::apis::urlencode(p_path_email));
-    let mut req_builder = configuration.client.request(reqwest::Method::PUT, &uri_str);
-
-    if let Some(ref user_agent) = configuration.user_agent {
-        req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
-    }
-    if let Some(ref token) = configuration.bearer_access_token {
-        req_builder = req_builder.bearer_auth(token.to_owned());
-    };
-    req_builder = req_builder.json(&p_body_set_vacation_responder_request);
-
-    let req = req_builder.build()?;
-    let resp = configuration.client.execute(req).await?;
-
-    let status = resp.status();
-    let content_type = resp
-        .headers()
-        .get("content-type")
-        .and_then(|v| v.to_str().ok())
-        .unwrap_or("application/octet-stream");
-    let content_type = super::ContentType::from(content_type);
-
-    if !status.is_client_error() && !status.is_server_error() {
-        let content = resp.text().await?;
-        match content_type {
-            ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
-            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::VacationResponder`"))),
-            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::VacationResponder`")))),
-        }
-    } else {
-        let content = resp.text().await?;
-        let entity: Option<SetVacationResponderError> = serde_json::from_str(&content).ok();
         Err(Error::ResponseError(ResponseContent { status, content, entity }))
     }
 }

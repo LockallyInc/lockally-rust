@@ -1,10 +1,14 @@
 [package]
 name = "lockally"
-version = "0.4.0"
-authors = ["support@lockally.com"]
-description = "The lockally control plane lets integrators and direct customers manage everything except actual mail data flow (which uses standard JMAP / IMAP / SMTP-submission against the data plane endpoints).  **Authentication.** All `/v1/_*` endpoints require a Bearer API key in the `Authorization` header. Keys are formatted `lk_live_<8-char-prefix>_<32-char-secret>`, or `lk_test_<...>` for a test key. Create keys in the dashboard, or with `POST /v1/api-keys` using a key that holds `tenant:admin`.  The key's plan is checked on every request, so a key stops working if the account moves to a plan without API access, and works again if it moves back.  **Errors.** Failures return [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) `application/problem+json` documents.  **Scopes.** Each endpoint requires a specific scope on the presented key. Insufficient scope returns `403` with the required scope name in `detail`. "
-license = "AGPL-3.0-only OR LicenseRef-LOC-Commercial"
+version = "0.5.0"
+authors = ["Lockally <support@lockally.com>"]
+description = "Official Lockally SDK for Rust: send email and manage mailboxes, domains and webhooks through the Lockally API."
+license = "MIT"
+keywords = ["lockally", "email", "email-api", "transactional-email", "sdk"]
+categories = ["api-bindings", "email"]
 edition = "2021"
+repository = "https://github.com/LockallyInc/lockally-rust"
+homepage = "https://lockally.com"
 
 [dependencies]
 serde = { version = "^1.0", features = ["derive"] }
