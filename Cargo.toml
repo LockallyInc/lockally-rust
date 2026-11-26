@@ -1,6 +1,6 @@
 [package]
 name = "lockally"
-version = "0.5.0"
+version = "0.6.0"
 authors = ["Lockally <support@lockally.com>"]
 description = "Official Lockally SDK for Rust: send email and manage mailboxes, domains and webhooks through the Lockally API."
 license = "MIT"

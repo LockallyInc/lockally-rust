@@ -13,8 +13,12 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct SendEmailRequest {
+    /// Sender address, alone (`orders@acme.com`) or with a display name (`Acme Orders <orders@acme.com>`). Only the address is checked against your sender rules and used as the envelope sender.
     #[serde(rename = "from")]
     pub from: String,
+    /// Display name recipients see next to `from`, e.g. `Acme Orders`. The same as giving it in `from`; if you do both, the names must match (400 `Conflicting from name`). Cannot contain `@` or control characters. Encoded and quoted for you, so accents, commas and quotes are safe.
+    #[serde(rename = "from_name", skip_serializing_if = "Option::is_none")]
+    pub from_name: Option<String>,
     #[serde(rename = "to")]
     pub to: Vec<String>,
     #[serde(rename = "cc", skip_serializing_if = "Option::is_none")]
@@ -69,6 +73,7 @@ impl SendEmailRequest {
     pub fn new(from: String, to: Vec<String>) -> SendEmailRequest {
         SendEmailRequest {
             from,
+            from_name: None,
             to,
             cc: None,
             bcc: None,

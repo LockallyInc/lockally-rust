@@ -89,7 +89,7 @@ pub async fn classify_thread(configuration: &configuration::Configuration, threa
     }
 }
 
-/// Body: {\"bundle\": \"100|500|2000\"}. One classification = one unit; bundles expire after 6 months. Admin session required. 503 until Paystack billing is configured.
+/// Body: {\"bundle\": \"300|1500|6000\"}. One classification = one unit; bundles expire after 3 months. Admin session required. 503 until Paystack billing is configured; 409 while prepaid AI units are not available on this server.
 pub async fn create_ai_units_checkout(configuration: &configuration::Configuration, ) -> Result<models::CreateAiUnitsCheckout200Response, Error<CreateAiUnitsCheckoutError>> {
 
     let uri_str = format!("{}/v1/billing/ai-units/checkout", configuration.base_path);

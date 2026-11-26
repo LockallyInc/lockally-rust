@@ -52,6 +52,8 @@ pub enum Scopes {
     DirectoryColonSync,
     #[serde(rename = "inboxes:read")]
     InboxesColonRead,
+    #[serde(rename = "inboxes:draft")]
+    InboxesColonDraft,
     #[serde(rename = "inboxes:write")]
     InboxesColonWrite,
     #[serde(rename = "send:read")]

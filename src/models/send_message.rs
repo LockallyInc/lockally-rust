@@ -13,8 +13,12 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct SendMessage {
+    /// Sender address, alone or as `Acme Orders <orders@acme.com>`.
     #[serde(rename = "from")]
     pub from: String,
+    /// Display name shown next to `from`. Must match a name given in `from`. Cannot contain `@` or control characters.
+    #[serde(rename = "from_name", skip_serializing_if = "Option::is_none")]
+    pub from_name: Option<String>,
     #[serde(rename = "to")]
     pub to: Vec<String>,
     #[serde(rename = "cc", skip_serializing_if = "Option::is_none")]
@@ -51,6 +55,7 @@ impl SendMessage {
     pub fn new(from: String, to: Vec<String>) -> SendMessage {
         SendMessage {
             from,
+            from_name: None,
             to,
             cc: None,
             bcc: None,

@@ -4,7 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**from** | **String** |  | 
+**from** | **String** | Sender address, alone or as `Acme Orders <orders@acme.com>`. | 
+**from_name** | Option<**String**> | Display name shown next to `from`. Must match a name given in `from`. Cannot contain `@` or control characters. | [optional]
 **to** | **Vec<String>** |  | 
 **cc** | Option<**Vec<String>**> |  | [optional]
 **bcc** | Option<**Vec<String>**> |  | [optional]
